@@ -33,22 +33,18 @@ public class CacheManager {
 	}
 
 	public static void writeCaches(Collection<ItemStack> itemsToCache){
-		boolean genJEICache = ThaumicSJWConfig.jeiConfig.categoryToggle.aspectFromItemStack && !JEI_CACHE.isFile();
 		boolean genAspectCache = ThaumicSJWConfig.speedupConfig.aspectCache && !ASPECT_CACHE.isFile();
 		boolean genEntityCache = ThaumicSJWConfig.speedupConfig.aspectCache && !ENTITY_CACHE.isFile();
+		boolean genJEICache = ThaumicSJWConfig.jeiConfig.categoryToggle.aspectFromItemStack && !JEI_CACHE.isFile();
 
-		if(genJEICache){
-			createJeiCache(JEI_CACHE, itemsToCache);
-		}
 		if(genAspectCache){
-			if(!genJEICache){
-				//Still scan all items to have a good aspect cache
-				itemsToCache.parallelStream().forEach(AspectList::new);
-			}
 			createAspectCache(ASPECT_CACHE);
 		}
 		if(genEntityCache){
 			createEntityCache(ENTITY_CACHE);
+		}
+		if(genJEICache){
+			createJeiCache(JEI_CACHE, itemsToCache);
 		}
 	}
 
@@ -230,8 +226,7 @@ public class CacheManager {
 			CommonInternals.objectTags = (ConcurrentHashMap<Integer, AspectList>) reader.readObject();
 			return true;
 		} catch (IOException | ClassNotFoundException e) {
-			ThaumicSJW.LOGGER.error("Error reading aspect cache. Please regenerate", e);
-			return false;
+			throw new RuntimeException("Error reading aspect cache. Please regenerate", e);
 		}
 	}
 
@@ -254,8 +249,7 @@ public class CacheManager {
 			CommonInternals.scanEntities = (ArrayList<thaumcraft.api.ThaumcraftApi.EntityTags>) reader.readObject();
 			return true;
 		} catch (IOException | ClassNotFoundException e) {
-			ThaumicSJW.LOGGER.error("Error reading entity cache. Please regenerate", e);
-			return false;
+			throw new RuntimeException("Error reading entity cache. Please regenerate", e);
 		}
 	}
 }
