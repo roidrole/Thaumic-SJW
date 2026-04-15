@@ -31,7 +31,7 @@ public abstract class AspectTooltipEverywhere {
 		name = "gui",
 		remap = false
 	)
-	private static GuiScreen skipComparingPostBackgroundTry2(GuiScreen gui){
+	private static GuiScreen skipComparingPostBackground(GuiScreen gui){
 		return new ZLevelGuiContainer(gui.zLevel);
 	}
 

@@ -9,9 +9,10 @@ import net.minecraftforge.common.config.Config;
 public class ThaumicSJWConfig {
 
 	public static final General general = new General();
+
 	public static class General {
 		@Config.Comment("The path in which the aspect caches will be written")
-		public String cachePath = "cache/"+Tags.MOD_ID;
+		public String cachePath = "cache/" + Tags.MOD_ID;
 
 		@Config.Comment("Allows rendering the ItemStacks aspects in all GUI")
 		public boolean aspectTooltipInAllGUI = true;
@@ -19,6 +20,7 @@ public class ThaumicSJWConfig {
 
 
 	public static final JEI jeiConfig = new JEI();
+
 	public static class JEI {
 		@Config.Comment("Hide recipes from JEI if you don't have the research for it")
 		public boolean hideRecipesIfMissingResearch = true;
@@ -35,6 +37,7 @@ public class ThaumicSJWConfig {
 		@Config.Name("Category Toggles")
 		@Config.Comment("Toggles to unregister any JEI Category")
 		public final CategoryToggle categoryToggle = new CategoryToggle();
+
 		public static class CategoryToggle {
 			@Config.Name("Arcane Workbench")
 			public boolean arcaneWorkbench = true;
@@ -59,6 +62,7 @@ public class ThaumicSJWConfig {
 		"If you experience such issues, disable these configs first and make an issue report on ThaumicSJW's Github"
 	})
 	public static final Speedup speedupConfig = new Speedup();
+
 	public static class Speedup {
 		@Config.Comment({
 			"Optimizes Thaumcraft's hash for ItemStacks",
@@ -78,5 +82,11 @@ public class ThaumicSJWConfig {
 			"Shouldn't cause much issue",
 		})
 		public boolean fasterOreDictWildcard = true;
+
+		@Config.Comment({
+			"Caches the entity and itemstack aspects on first launch",
+			"Limits the amount of different aspects and the quantity of any aspect to 255"
+		})
+		public boolean aspectCache = true;
 	}
 }

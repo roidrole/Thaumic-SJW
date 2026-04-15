@@ -7,8 +7,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.Logger;
 import roidrole.thaumicsjw.jei.ResearchManager;
 
-import java.io.File;
-
 
 @Mod(
     modid = Tags.MOD_ID,
@@ -20,11 +18,6 @@ import java.io.File;
 )
 public class ThaumicSJW {
     public static Logger LOGGER;
-
-    static final File CACHE_FOLDER = new File(ThaumicSJWConfig.general.cachePath);
-    static {
-        CACHE_FOLDER.mkdirs();
-    }
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {

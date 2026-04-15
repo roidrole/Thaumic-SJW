@@ -1,0 +1,261 @@
+package roidrole.thaumicsjw;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
+import mezz.jei.api.IModRegistry;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.NBTException;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.util.ResourceLocation;
+import roidrole.thaumicsjw.jei.categories.AspectFromItemStackCategory;
+import roidrole.thaumicsjw.utils.ArrayMap;
+import thaumcraft.api.aspects.Aspect;
+import thaumcraft.api.aspects.AspectHelper;
+import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.internal.CommonInternals;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class CacheManager {
+	private static final File JEI_CACHE = new File(ThaumicSJWConfig.general.cachePath, "jei-cache.json");
+	private static final File ASPECT_CACHE = new File(ThaumicSJWConfig.general.cachePath, "aspect-cache.bin");
+	private static final File ENTITY_CACHE = new File(ThaumicSJWConfig.general.cachePath, "entity-cache.bin");
+
+	static {
+		new File(ThaumicSJWConfig.general.cachePath).mkdirs();
+	}
+
+	public static void writeCaches(Collection<ItemStack> itemsToCache){
+		boolean genJEICache = ThaumicSJWConfig.jeiConfig.categoryToggle.aspectFromItemStack && !JEI_CACHE.isFile();
+		boolean genAspectCache = ThaumicSJWConfig.speedupConfig.aspectCache && !ASPECT_CACHE.isFile();
+		boolean genEntityCache = ThaumicSJWConfig.speedupConfig.aspectCache && !ENTITY_CACHE.isFile();
+
+		if(genJEICache){
+			createJeiCache(JEI_CACHE, itemsToCache);
+		}
+		if(genAspectCache){
+			if(!genJEICache){
+				//Still scan all items to have a good aspect cache
+				itemsToCache.parallelStream().forEach(AspectList::new);
+			}
+			createAspectCache(ASPECT_CACHE);
+		}
+		if(genEntityCache){
+			createEntityCache(ENTITY_CACHE);
+		}
+	}
+
+	public static void createJeiCache(File aspectFile, Collection<ItemStack> items){
+		long time = System.currentTimeMillis();
+		ThaumicSJW.LOGGER.info("Caching ItemStack Aspects.");
+		ThaumicSJW.LOGGER.info("Trying to cache {} aspects.", items.size());
+		//Filter out blacklisted items
+		Set<ResourceLocation> blacklist = new HashSet<>();
+		for (String string : ThaumicSJWConfig.jeiConfig.blacklistedFromAspectChecking){
+			blacklist.add(new ResourceLocation(string));
+		}
+		blacklist.add(null);
+		blacklist.add(Items.AIR.getRegistryName());
+
+		Map<Aspect, ArrayMap<List<String>>> cache = new ConcurrentHashMap<>();
+		for(Aspect aspect : Aspect.aspects.values()){
+			cache.put(aspect, new ArrayMap<>());
+		}
+
+		//Because concurrency
+		final int[] cachedAmount = {0};
+		final long[] lastTimeChecked = {System.currentTimeMillis()};
+
+		items
+			.parallelStream()
+			.filter(stack -> !blacklist.contains(Item.REGISTRY.getNameForObject(stack.getItem())))
+			//Since Thaumcraft caches ItemStack aspects itself, filtering for empty AspectList is fine
+			.filter(stack -> {
+				AspectList list = AspectHelper.getObjectAspects(stack);
+				if (list == null || list.size() == 0){
+					cachedAmount[0]++;
+					return false;
+				}
+				return true;
+			})
+			.forEach(stack -> {
+				AspectList list = AspectHelper.getObjectAspects(stack);
+				list.aspects.forEach((aspect, count) -> cache
+					.get(aspect)
+					.computeIfAbsent(count, ArrayList::new)
+					.add(writeItemStack(stack, count)));
+
+				cachedAmount[0]++;
+				if (lastTimeChecked[0] + 5000 < System.currentTimeMillis()) {
+					lastTimeChecked[0] = System.currentTimeMillis();
+					ThaumicSJW.LOGGER.info("ItemStack Aspect checking at {}%", 100 * cachedAmount[0] / items.size());
+				}
+			})
+		;
+
+		ThaumicSJW.LOGGER.info("ItemStack Aspect checking at 100%");
+		try (JsonWriter writer = new JsonWriter(new FileWriter(aspectFile))){
+			writer.setIndent("\t");
+			//Write the JSON by hand. Less annoying
+			writer.beginObject();
+			cache
+				.entrySet()
+				.stream()
+				.sorted(Map.Entry.comparingByKey(Comparator.comparing(Aspect::getTag)))
+				.forEach(entry -> {
+					try {
+						writer.name(entry.getKey().getTag());
+						writer.beginArray();
+						entry.getValue().forEach(
+							(count, list) -> list.forEach(stack -> {
+								try {
+									writer.jsonValue(stack);
+								} catch (IOException ignored) { }
+							})
+						);
+						writer.endArray();
+					} catch (IOException ignored) { }
+				});
+			writer.endObject();
+		} catch (IOException e) {
+			ThaumicSJW.LOGGER.error("Can't write aspect file!", e);
+		}
+		ThaumicSJW.LOGGER.info("Wrote aspect file in {} ms", System.currentTimeMillis() - time);
+	}
+
+	public static void parseJeiCache(IModRegistry registry){
+		long time = System.currentTimeMillis();
+		List<AspectFromItemStackCategory.AspectFromItemStackWrapper> wrappers = new ArrayList<>();
+		Map<Aspect, List<ItemStack>> cache = new LinkedHashMap<>(Aspect.aspects.size());
+
+		try (JsonReader reader = new JsonReader(new FileReader(JEI_CACHE))){
+			reader.beginObject();
+
+			do {
+				Aspect aspect = Aspect.getAspect(reader.nextName());
+				List<ItemStack> list = new ArrayList<>();
+				cache.put(aspect, list);
+				reader.beginArray();
+				while(reader.peek() != JsonToken.END_ARRAY){
+					list.add(readItemStack(reader));
+				}
+				reader.endArray();
+
+			} while (reader.peek() != JsonToken.END_OBJECT);
+			reader.endObject();
+
+
+			cache.forEach((aspect, stacks) -> {
+				AspectList aspectList = new AspectList();
+				aspectList.add(aspect, 0);
+				int start = 0;
+				while (start < stacks.size() - 36) {
+					List<ItemStack> subList = stacks.subList(start, start + 36);
+					wrappers.add(new AspectFromItemStackCategory.AspectFromItemStackWrapper(aspectList, subList));
+					start += 36;
+				}
+				List<ItemStack> subList = stacks.subList(start, stacks.size());
+				wrappers.add(new AspectFromItemStackCategory.AspectFromItemStackWrapper(aspectList, subList));
+			});
+		} catch (FileNotFoundException e) {
+			ThaumicSJW.LOGGER.error("Can't read aspect file!", e);
+			return;
+		} catch (NBTException e) {
+			ThaumicSJW.LOGGER.error("Malformed aspect file. Please regenerate", e);
+		} catch (IOException e) {
+			ThaumicSJW.LOGGER.error("Can't read aspect file. Please regenerate", e);
+		}
+		ThaumicSJW.LOGGER.info("Parsed aspect file in {} ms", System.currentTimeMillis() - time);
+
+		registry.addRecipes(wrappers, AspectFromItemStackCategory.UUID);
+	}
+
+	//Writes ItemStack to format: [resourceLocation, count, damage, tag]
+	public static String writeItemStack(ItemStack stack, int count){
+		StringBuilder itemNbt = new StringBuilder(64);
+		itemNbt.append("[\"");
+		itemNbt.append(Item.REGISTRY.getNameForObject(stack.getItem()));
+		itemNbt.append("\",");
+		itemNbt.append(count);
+		if(stack.getItemDamage() != 0){
+			itemNbt.append(',');
+			itemNbt.append(stack.getItemDamage());
+		}
+		if (stack.getTagCompound() != null){
+			itemNbt.append(',');
+			itemNbt.append(NBTTagString.quoteAndEscape(stack.getTagCompound().toString()));
+		}
+		itemNbt.append(']');
+		return itemNbt.toString();
+	}
+
+	//Reads ItemStack from format: [resourceLocation, count, damage, tag]
+	public static ItemStack readItemStack(JsonReader reader) throws IOException, NBTException {
+		reader.setLenient(true);
+		reader.beginArray();
+		ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(reader.nextString())), reader.nextInt());
+		if(reader.peek() == JsonToken.NUMBER){
+			stack.setItemDamage(reader.nextInt());
+		}
+		if(reader.peek() == JsonToken.STRING){
+			stack.setTagCompound(JsonToNBT.getTagFromJson(reader.nextString()));
+		}
+		reader.endArray();
+		return stack;
+	}
+
+
+	//Dumps the contents of CommonInternals.objectTags to a binary file
+	public static void createAspectCache(File aspectFile){
+		try(ObjectOutputStream writer = new ObjectOutputStream(Files.newOutputStream(aspectFile.toPath()))){
+			writer.writeObject(CommonInternals.objectTags);
+		} catch (IOException e) {
+			throw new RuntimeException("Error writing aspect file", e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static boolean parseAspectCache(){
+		if(!ASPECT_CACHE.isFile()){
+			return false;
+		}
+		try(ObjectInputStream reader = new ObjectInputStream(Files.newInputStream(ASPECT_CACHE.toPath()))){
+			CommonInternals.objectTags = (ConcurrentHashMap<Integer, AspectList>) reader.readObject();
+			return true;
+		} catch (IOException | ClassNotFoundException e) {
+			ThaumicSJW.LOGGER.error("Error reading aspect cache. Please regenerate", e);
+			return false;
+		}
+	}
+
+
+	//Dumps the contents of CommonInternals.scanEntities to a binary file
+	public static void createEntityCache(File entityFile){
+		try(ObjectOutputStream writer = new ObjectOutputStream(Files.newOutputStream(entityFile.toPath()))){
+			writer.writeObject(CommonInternals.scanEntities);
+		} catch (IOException e) {
+			throw new RuntimeException("Error writing aspect file", e);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static boolean parseEntityCache(){
+		if(!ENTITY_CACHE.isFile()){
+			return false;
+		}
+		try(ObjectInputStream reader = new ObjectInputStream(Files.newInputStream(ENTITY_CACHE.toPath()))){
+			CommonInternals.scanEntities = (ArrayList<thaumcraft.api.ThaumcraftApi.EntityTags>) reader.readObject();
+			return true;
+		} catch (IOException | ClassNotFoundException e) {
+			ThaumicSJW.LOGGER.error("Error reading entity cache. Please regenerate", e);
+			return false;
+		}
+	}
+}
