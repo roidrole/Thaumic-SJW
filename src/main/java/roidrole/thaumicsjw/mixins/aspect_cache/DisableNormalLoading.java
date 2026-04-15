@@ -15,8 +15,10 @@ public abstract class DisableNormalLoading {
 		cancellable = true,
 		remap = false
 	)
-	private static void noAspectRegisteringIfRunningCache(CallbackInfo ci){
-		if(CacheManager.parseAspectCache() && CacheManager.parseEntityCache()){
+	private static void thaumicsjw_readCaches(CallbackInfo ci){
+		if(CacheManager.canRunCaches()){
+			CacheManager.parseAspectCache();
+			CacheManager.parseEntityCache();
 			ci.cancel();
 		}
 	}

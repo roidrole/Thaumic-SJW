@@ -2,6 +2,7 @@ package roidrole.thaumicsjw;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import org.apache.logging.log4j.Logger;
@@ -25,5 +26,10 @@ public class ThaumicSJW {
         if(event.getSide() == Side.CLIENT && ThaumicSJWConfig.jeiConfig.hideRecipesIfMissingResearch){
             MinecraftForge.EVENT_BUS.register(ResearchManager.class);
         }
+    }
+
+    @Mod.EventHandler
+    public void loadComplete(FMLLoadCompleteEvent event){
+        CacheManager.writeCaches();
     }
 }

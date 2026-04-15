@@ -2,7 +2,6 @@ package roidrole.thaumicsjw;
 
 import mezz.jei.api.*;
 import mezz.jei.api.ingredients.IModIngredientRegistration;
-import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IIngredientType;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
 import mezz.jei.api.recipe.VanillaRecipeCategoryUid;
@@ -78,8 +77,7 @@ public class HEIPlugin implements IModPlugin {
 
 	@Override
 	public void register(@Nonnull IModRegistry registry){
-		CacheManager.writeCaches(registry.getIngredientRegistry().getAllIngredients(VanillaTypes.ITEM));
-
+		CacheManager.jeiRegistry = registry;
 		//Since they are added to the list during the constructor, these already encompass their config option
 		for(AbstractResearchCategory<?> category : AbstractResearchCategory.categories){
 			category.populateRecipes();

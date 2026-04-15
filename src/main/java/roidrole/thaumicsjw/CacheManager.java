@@ -4,6 +4,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import mezz.jei.api.IModRegistry;
+import mezz.jei.api.ingredients.VanillaTypes;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -27,12 +28,17 @@ public class CacheManager {
 	private static final File JEI_CACHE = new File(ThaumicSJWConfig.general.cachePath, "jei-cache.json");
 	private static final File ASPECT_CACHE = new File(ThaumicSJWConfig.general.cachePath, "aspect-cache.bin");
 	private static final File ENTITY_CACHE = new File(ThaumicSJWConfig.general.cachePath, "entity-cache.bin");
+	public static IModRegistry jeiRegistry;
 
 	static {
 		new File(ThaumicSJWConfig.general.cachePath).mkdirs();
 	}
 
-	public static void writeCaches(Collection<ItemStack> itemsToCache){
+	public static boolean canRunCaches(){
+		return ASPECT_CACHE.isFile() && ENTITY_CACHE.isFile();
+	}
+
+	public static void writeCaches(){
 		boolean genAspectCache = ThaumicSJWConfig.speedupConfig.aspectCache && !ASPECT_CACHE.isFile();
 		boolean genEntityCache = ThaumicSJWConfig.speedupConfig.aspectCache && !ENTITY_CACHE.isFile();
 		boolean genJEICache = ThaumicSJWConfig.jeiConfig.categoryToggle.aspectFromItemStack && !JEI_CACHE.isFile();
@@ -44,11 +50,12 @@ public class CacheManager {
 			createEntityCache(ENTITY_CACHE);
 		}
 		if(genJEICache){
-			createJeiCache(JEI_CACHE, itemsToCache);
+			createJeiCache(JEI_CACHE);
 		}
 	}
 
-	public static void createJeiCache(File aspectFile, Collection<ItemStack> items){
+	public static void createJeiCache(File aspectFile){
+		Collection<ItemStack> items = jeiRegistry.getIngredientRegistry().getAllIngredients(VanillaTypes.ITEM);
 		long time = System.currentTimeMillis();
 		ThaumicSJW.LOGGER.info("Caching ItemStack Aspects.");
 		ThaumicSJW.LOGGER.info("Trying to cache {} aspects.", items.size());
@@ -124,6 +131,7 @@ public class CacheManager {
 			ThaumicSJW.LOGGER.error("Can't write aspect file!", e);
 		}
 		ThaumicSJW.LOGGER.info("Wrote aspect file in {} ms", System.currentTimeMillis() - time);
+		jeiRegistry = null;
 	}
 
 	public static void parseJeiCache(IModRegistry registry){
@@ -218,13 +226,9 @@ public class CacheManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static boolean parseAspectCache(){
-		if(!ASPECT_CACHE.isFile()){
-			return false;
-		}
+	public static void parseAspectCache(){
 		try(ObjectInputStream reader = new ObjectInputStream(Files.newInputStream(ASPECT_CACHE.toPath()))){
 			CommonInternals.objectTags = (ConcurrentHashMap<Integer, AspectList>) reader.readObject();
-			return true;
 		} catch (IOException | ClassNotFoundException e) {
 			throw new RuntimeException("Error reading aspect cache. Please regenerate", e);
 		}
@@ -241,13 +245,9 @@ public class CacheManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static boolean parseEntityCache(){
-		if(!ENTITY_CACHE.isFile()){
-			return false;
-		}
+	public static void parseEntityCache(){
 		try(ObjectInputStream reader = new ObjectInputStream(Files.newInputStream(ENTITY_CACHE.toPath()))){
 			CommonInternals.scanEntities = (ArrayList<thaumcraft.api.ThaumcraftApi.EntityTags>) reader.readObject();
-			return true;
 		} catch (IOException | ClassNotFoundException e) {
 			throw new RuntimeException("Error reading entity cache. Please regenerate", e);
 		}
