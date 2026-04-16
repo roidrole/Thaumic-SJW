@@ -22,21 +22,24 @@ public abstract class ThaumcraftApiMixin {
 		if(CommonInternals.objectTags.get(CommonInternals.generateUniqueItemstackId(item)) != null){
 			return true;
 		}
-		ItemStack stack = item.copy();
+		int oldDamage = item.getItemDamage();
 
-		if (stack.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
+		if (item.getItemDamage() == OreDictionary.WILDCARD_VALUE) {
 			for (int i = 0; i < 16; i++) {
-				stack.setItemDamage(i);
-				if (CommonInternals.objectTags.get(CommonInternals.generateUniqueItemstackId(stack)) != null) {
+				item.setItemDamage(i);
+				if (CommonInternals.objectTags.get(CommonInternals.generateUniqueItemstackId(item)) != null) {
+					item.setItemDamage(oldDamage);
 					return true;
 				}
 			}
 		} else {
-			stack.setItemDamage(OreDictionary.WILDCARD_VALUE);
-			if (CommonInternals.objectTags.get(CommonInternals.generateUniqueItemstackId(stack)) != null) {
+			item.setItemDamage(OreDictionary.WILDCARD_VALUE);
+			if (CommonInternals.objectTags.get(CommonInternals.generateUniqueItemstackId(item)) != null) {
+				item.setItemDamage(oldDamage);
 				return true;
 			}
 		}
+		item.setItemDamage(oldDamage);
 		return false;
 	}
 

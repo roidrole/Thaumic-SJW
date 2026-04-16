@@ -1,6 +1,5 @@
 package roidrole.thaumicsjw.mixins.faster_hash;
 
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -16,7 +15,7 @@ public abstract class CommonInternalsMixin {
 	 */
 	@Overwrite(remap = false)
 	public static int generateUniqueItemstackId(ItemStack stack) {
-		return Objects.hash(Item.REGISTRY.getNameForObject(stack.getItem()), stack.getItemDamage(), stack.getTagCompound());
+		return Objects.hash(stack.getItem().delegate.name(), stack.getItemDamage(), stack.getTagCompound());
 	}
 
 	/**
@@ -25,6 +24,6 @@ public abstract class CommonInternalsMixin {
 	 */
 	@Overwrite(remap = false)
 	public static int generateUniqueItemstackIdStripped(ItemStack stack) {
-		return Objects.hash(Item.REGISTRY.getNameForObject(stack.getItem()), stack.getItemDamage());
+		return Objects.hash(stack.getItem().delegate.name(), stack.getItemDamage());
 	}
 }
