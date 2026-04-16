@@ -67,7 +67,8 @@ public class ThaumicSJWConfig {
 		@Config.Comment({
 			"Optimizes Thaumcraft's hash for ItemStacks",
 			"Thaumcraft internally uses this hash to map Aspects to ItemStacks and to handle oredict scanning",
-			"Toggling this option will require you to delete the itemstack cache and the jei cache"
+			"Toggling this option will require you to delete the itemstack cache and the jei cache",
+			"Note that this option will make aspects independant of capabilities"
 		})
 		public boolean fasterHash = true;
 
@@ -89,11 +90,5 @@ public class ThaumicSJWConfig {
 			"This limit does not apply on aspects computed through recipes"
 		})
 		public boolean aspectCache = true;
-
-		@Config.Comment({
-			"Optimized the underlying data structure of aspect lists read from cache",
-			"This option has no effect if aspectCache is false"
-		})
-		public boolean optimizeAspectListUnderlyingDataStructure = true;
 	}
 }
