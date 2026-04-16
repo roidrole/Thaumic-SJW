@@ -85,8 +85,15 @@ public class ThaumicSJWConfig {
 
 		@Config.Comment({
 			"Caches the entity and itemstack aspects on first launch",
-			"Limits the amount of different aspects and the quantity of any aspect to 255"
+			"Limits the amount of cached different aspects and the quantity of any aspect to 255",
+			"This limit does not apply on aspects computed through recipes"
 		})
 		public boolean aspectCache = true;
+
+		@Config.Comment({
+			"Optimized the underlying data structure of aspect lists read from cache",
+			"This option has no effect if aspectCache is false"
+		})
+		public boolean optimizeAspectListUnderlyingDataStructure = true;
 	}
 }

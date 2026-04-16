@@ -21,6 +21,7 @@ public abstract class SerializableAspectList implements Externalizable {
 
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
+		out.write(this.aspects.size());
 		for (Map.Entry<Aspect, Integer> entry : this.aspects.entrySet()) {
 			out.writeObject(entry.getKey().getTag());
 			out.write(entry.getValue());
@@ -29,7 +30,8 @@ public abstract class SerializableAspectList implements Externalizable {
 
 	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-		for (int i = 0; i < in.read(); i++) {
+		int limit = in.read();
+		for (int i = 0; i < limit; i++) {
 			this.aspects.put(
 				Aspect.getAspect((String)in.readObject()),
 				in.read()

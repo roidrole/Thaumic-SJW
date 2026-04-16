@@ -1,12 +1,14 @@
 {
-	"package": "roidrole.thaumicsjw.mixins",
+	"package": "roidrole.thaumicsjw.mixins.faster_hash",
 	"required": true,
 	"refmap": "mixins.tfutils.refmap.json",
 	"target": "@env(DEFAULT)",
 	"minVersion": "0.8.5",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
-		"FasterHash"
+		"CommonInternalsMixin",
+		"CraftingManagerMixin",
+		"ThaumcraftApiMixin"
 	],
 	"server": [],
 	"client": []

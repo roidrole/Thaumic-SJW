@@ -9,7 +9,7 @@ import java.util.List;
 public class LateMixinLoader implements ILateMixinLoader {
 	@Override
 	public List<String> getMixinConfigs() {
-		ArrayList<String> mixinConfigs = new ArrayList<>(4);
+		ArrayList<String> mixinConfigs = new ArrayList<>(8);
 		if(ThaumicSJWConfig.general.aspectTooltipInAllGUI){
 			mixinConfigs.add("mixins.thaumicsjw.aspect_tooltip_everywhere.json");
 		}
