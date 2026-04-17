@@ -8,8 +8,8 @@ import net.minecraftforge.common.config.Config;
 )
 public class ThaumicSJWConfig {
 
+	@Config.Name("General Configs")
 	public static final General general = new General();
-
 	public static class General {
 		@Config.Comment("The path in which the aspect caches will be written")
 		public String cachePath = "cache/" + Tags.MOD_ID;
@@ -19,8 +19,8 @@ public class ThaumicSJWConfig {
 	}
 
 
+	@Config.Name("JEI Configs")
 	public static final JEI jeiConfig = new JEI();
-
 	public static class JEI {
 		@Config.Comment("Hide recipes from JEI if you don't have the research for it")
 		public boolean hideRecipesIfMissingResearch = true;
