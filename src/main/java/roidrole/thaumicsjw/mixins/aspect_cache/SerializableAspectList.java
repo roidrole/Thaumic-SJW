@@ -12,8 +12,6 @@ import java.io.ObjectOutput;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-//TODO: Consider making Aspect an enum
-//Serialization/Deserialization can therefore be ordinals instead
 @Mixin(AspectList.class)
 public abstract class SerializableAspectList implements Externalizable {
 	@Shadow(remap = false)
@@ -31,6 +29,7 @@ public abstract class SerializableAspectList implements Externalizable {
 	@Override
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		int limit = in.read();
+		this.aspects = new LinkedHashMap<>((int)(1.5 * limit));
 		for (int i = 0; i < limit; i++) {
 			this.aspects.put(
 				Aspect.getAspect((String)in.readObject()),
