@@ -4,6 +4,7 @@ import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
 import mcp.mobius.waila.api.SpecialChars;
+import mcp.mobius.waila.api.impl.ConfigHandler;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -28,7 +29,7 @@ public class ProviderEssentiaTransport implements IWailaDataProvider {
 		if (!(te instanceof IEssentiaTransport)) {
 			return tag;
 		}
-		if (!EntityUtils.hasGoggles(player)) {
+		if (ConfigHandler.instance().getConfig("require_goggles") && !EntityUtils.hasGoggles(player)) {
 			return tag;
 		}
 
@@ -76,23 +77,17 @@ public class ProviderEssentiaTransport implements IWailaDataProvider {
 			tooltip.add(
 				I18n.format("tc.resonator1",
 					SpecialChars.WailaSplitter +essentia.getInteger("amount"),
-					SpecialChars.WailaSplitter + SpecialChars.getRenderString("thaumicwaila.aspect", essentiaTag)
+					RendererAspect.showAspect(essentiaTag)
 				)
 			);
 		}
 
 		NBTTagCompound suction = thisFacing.getCompoundTag("suction");
 		String suctionTag = suction.getString("tag");
-		String essentiaString;
-		if (!suctionTag.isEmpty()) {
-			essentiaString = SpecialChars.WailaSplitter + SpecialChars.getRenderString("thaumicwaila.aspect", suctionTag);
-		} else {
-			essentiaString = I18n.format("tc.resonator3");
-		}
 		tooltip.add(
 			I18n.format("tc.resonator2",
 				SpecialChars.WailaSplitter + suction.getInteger("amount"),
-				essentiaString
+				RendererAspect.showAspect(suctionTag)
 			)
 		);
 

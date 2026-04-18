@@ -2,9 +2,13 @@ package roidrole.thaumicsjw.hwyla;
 
 import mcp.mobius.waila.api.IWailaCommonAccessor;
 import mcp.mobius.waila.api.IWailaTooltipRenderer;
+import mcp.mobius.waila.api.SpecialChars;
+import mcp.mobius.waila.api.impl.ConfigHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.resources.I18n;
+import org.apache.commons.lang3.text.WordUtils;
 import thaumcraft.api.aspects.Aspect;
 
 import javax.annotation.Nonnull;
@@ -35,5 +39,18 @@ public class RendererAspect implements IWailaTooltipRenderer {
 		);
 		Gui.drawModalRectWithCustomSizedTexture(0, 0, 0, 0, 8, 8, 8, 8);
 		GlStateManager.popMatrix();
+	}
+
+	/*
+	 * Utility method compatible with Show Aspect As String in-game config
+	 */
+	public static String showAspect(String essentiaString){
+		if(essentiaString.isEmpty()){
+			return I18n.format("tc.resonator3");
+		}
+		if(ConfigHandler.instance().getConfig("aspects_as_text")){
+			return WordUtils.capitalizeFully(essentiaString);
+		}
+		return SpecialChars.WailaSplitter + SpecialChars.getRenderString("thaumicwaila.aspect", essentiaString);
 	}
 }
