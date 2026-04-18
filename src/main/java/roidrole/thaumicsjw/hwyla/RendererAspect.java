@@ -9,6 +9,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import org.apache.commons.lang3.text.WordUtils;
+import roidrole.thaumicsjw.Tags;
 import thaumcraft.api.aspects.Aspect;
 
 import javax.annotation.Nonnull;
@@ -48,7 +49,7 @@ public class RendererAspect implements IWailaTooltipRenderer {
 		if(essentiaString.isEmpty()){
 			return I18n.format("tc.resonator3");
 		}
-		if(ConfigHandler.instance().getConfig("aspects_as_text")){
+		if(ConfigHandler.instance().getConfig(Tags.MOD_ID+"aspects_as_text")){
 			return WordUtils.capitalizeFully(essentiaString);
 		}
 		return SpecialChars.WailaSplitter + SpecialChars.getRenderString("thaumicwaila.aspect", essentiaString);

@@ -5,6 +5,7 @@ import mcp.mobius.waila.api.IWailaDataAccessor;
 import mcp.mobius.waila.api.IWailaDataProvider;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import roidrole.thaumicsjw.Tags;
 import thaumcraft.api.items.IGogglesDisplayExtended;
 import thaumcraft.common.lib.utils.EntityUtils;
 
@@ -22,7 +23,7 @@ public class ProviderGogglesDisplay implements IWailaDataProvider {
 		if (!(te instanceof IGogglesDisplayExtended)) {
 			return tooltip;
 		}
-		if (config.getConfig("require_goggles") && !EntityUtils.hasGoggles(accessor.getPlayer())) {
+		if (config.getConfig(Tags.MOD_ID+"require_goggles") && !EntityUtils.hasGoggles(accessor.getPlayer())) {
 			return tooltip;
 		}
 
