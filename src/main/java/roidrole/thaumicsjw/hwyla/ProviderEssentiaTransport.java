@@ -8,7 +8,9 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import thaumcraft.api.aspects.IEssentiaTransport;
@@ -29,19 +31,26 @@ public class ProviderEssentiaTransport implements IWailaDataProvider {
 		if (!EntityUtils.hasGoggles(player)) {
 			return tag;
 		}
+
 		IEssentiaTransport transporter = (IEssentiaTransport) te;
-		if (transporter.getEssentiaType(null) != null) {
-			NBTTagCompound essentia = new NBTTagCompound();
-			essentia.setString("tag", transporter.getEssentiaType(null).getTag());
-			essentia.setInteger("amount", transporter.getEssentiaAmount(null));
-			tag.setTag("essentia", essentia);
+		NBTTagList facings = new NBTTagList();
+		for (EnumFacing facing : EnumFacing.VALUES) {
+			NBTTagCompound facingTag = new NBTTagCompound();
+			if (transporter.getEssentiaType(facing) != null) {
+				NBTTagCompound essentia = new NBTTagCompound();
+				essentia.setString("tag", transporter.getEssentiaType(facing).getTag());
+				essentia.setInteger("amount", transporter.getEssentiaAmount(facing));
+				facingTag.setTag("essentia", essentia);
+			}
+			NBTTagCompound suction = new NBTTagCompound();
+			if (transporter.getSuctionType(facing) != null) {
+				suction.setString("tag", transporter.getSuctionType(facing).getTag());
+			}
+			suction.setInteger("amount", transporter.getSuctionAmount(facing));
+			facingTag.setTag("suction", suction);
+			facings.appendTag(facingTag);
 		}
-		NBTTagCompound suction = new NBTTagCompound();
-		if (transporter.getSuctionType(null) != null) {
-			suction.setString("tag", transporter.getSuctionType(null).getTag());
-		}
-		suction.setInteger("amount", transporter.getSuctionAmount(null));
-		tag.setTag("suction", suction);
+		tag.setTag("essentiatransport", facings);
 		return tag;
 	}
 
@@ -49,11 +58,19 @@ public class ProviderEssentiaTransport implements IWailaDataProvider {
 	@Override
 	public List<String> getWailaBody(ItemStack itemStack, List<String> tooltip, IWailaDataAccessor accessor, IWailaConfigHandler config) {
 		NBTTagCompound data = accessor.getNBTData();
-		if (data.isEmpty() || !data.hasKey("suction")) {
+		if (data.isEmpty()) {
+			return tooltip;
+		}
+		NBTTagList facings = data.getTagList("essentiatransport", 10);
+		if(facings.isEmpty()){
+			return tooltip;
+		}
+		NBTTagCompound thisFacing = facings.getCompoundTagAt(accessor.getSide().getIndex());
+		if(thisFacing.isEmpty()){
 			return tooltip;
 		}
 
-		NBTTagCompound essentia = data.getCompoundTag("essentia");
+		NBTTagCompound essentia = thisFacing.getCompoundTag("essentia");
 		String essentiaTag = essentia.getString("tag");
 		if (!essentiaTag.isEmpty()) {
 			tooltip.add(
@@ -64,7 +81,7 @@ public class ProviderEssentiaTransport implements IWailaDataProvider {
 			);
 		}
 
-		NBTTagCompound suction = data.getCompoundTag("suction");
+		NBTTagCompound suction = thisFacing.getCompoundTag("suction");
 		String suctionTag = suction.getString("tag");
 		String essentiaString;
 		if (!suctionTag.isEmpty()) {

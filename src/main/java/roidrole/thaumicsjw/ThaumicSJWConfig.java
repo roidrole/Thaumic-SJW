@@ -19,6 +19,38 @@ public class ThaumicSJWConfig {
 	}
 
 
+	@Config.Name("Speedup Configs")
+	public static final Speedup speedupConfig = new Speedup();
+	public static class Speedup {
+		@Config.Comment({
+			"Optimizes Thaumcraft's hash for ItemStacks",
+			"Thaumcraft internally uses this hash to map Aspects to ItemStacks and to handle oredict scanning",
+			"Toggling this option will require you to delete the itemstack cache and the jei cache",
+			"Note that this option will make ItemStacks aspect matching disregard capabilities"
+		})
+		public boolean fasterHash = true;
+
+		@Config.Comment({
+			"Implements FastWorkbench for the pattern crafter",
+			"Shouldn't cause much issue",
+		})
+		public boolean patternCrafterRecipeCache = true;
+
+		@Config.Comment({
+			"Optimizes the acquisition of oreDicts ending in a wildcard i.e. ingot*",
+			"Shouldn't cause much issue",
+		})
+		public boolean fasterOreDictWildcard = true;
+
+		@Config.Comment({
+			"Caches the entity and itemstack aspects on first launch",
+			"Limits the amount of cached different aspects and the quantity of any aspect to 255",
+			"This limit does not apply on aspects computed through recipes"
+		})
+		public boolean aspectCache = true;
+	}
+
+
 	@Config.Name("JEI Configs")
 	public static final JEI jeiConfig = new JEI();
 	public static class JEI {
@@ -54,41 +86,5 @@ public class ThaumicSJWConfig {
 			@Config.Name("Infusion Crafting")
 			public boolean infusion = true;
 		}
-	}
-
-	@Config.Name("Speedup Configs")
-	@Config.Comment({
-		"/!\\ Warning /!\\ some of these mixins have been pulled from thaumic speedup, which is known to sometimes mess up item aspects",
-		"If you experience such issues, disable these configs first and make an issue report on ThaumicSJW's Github"
-	})
-	public static final Speedup speedupConfig = new Speedup();
-
-	public static class Speedup {
-		@Config.Comment({
-			"Optimizes Thaumcraft's hash for ItemStacks",
-			"Thaumcraft internally uses this hash to map Aspects to ItemStacks and to handle oredict scanning",
-			"Toggling this option will require you to delete the itemstack cache and the jei cache",
-			"Note that this option will make aspects independant of capabilities"
-		})
-		public boolean fasterHash = true;
-
-		@Config.Comment({
-			"Implements FastWorkbench for the pattern crafter",
-			"Shouldn't cause much issue",
-		})
-		public boolean patternCrafterRecipeCache = true;
-
-		@Config.Comment({
-			"Optimizes the acquisition of oreDicts ending in a wildcard i.e. ingot*",
-			"Shouldn't cause much issue",
-		})
-		public boolean fasterOreDictWildcard = true;
-
-		@Config.Comment({
-			"Caches the entity and itemstack aspects on first launch",
-			"Limits the amount of cached different aspects and the quantity of any aspect to 255",
-			"This limit does not apply on aspects computed through recipes"
-		})
-		public boolean aspectCache = true;
 	}
 }
