@@ -49,7 +49,7 @@ public class RendererAspect implements IWailaTooltipRenderer {
 		if(essentiaString.isEmpty()){
 			return I18n.format("tc.resonator3");
 		}
-		if(ConfigHandler.instance().getConfig(Tags.MOD_ID+"aspects_as_text")){
+		if(ConfigHandler.instance().getConfig(Tags.MOD_ID+".aspects_as_text")){
 			return WordUtils.capitalizeFully(essentiaString);
 		}
 		return SpecialChars.WailaSplitter + SpecialChars.getRenderString("thaumicwaila.aspect", essentiaString);

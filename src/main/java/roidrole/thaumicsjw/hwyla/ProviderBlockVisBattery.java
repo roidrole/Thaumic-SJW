@@ -19,7 +19,7 @@ public class ProviderBlockVisBattery implements IWailaDataProvider {
 	@Nonnull
 	@Override
 	public List<String> getWailaBody(ItemStack itemStack, List<String> tooltip, IWailaDataAccessor accessor, IWailaConfigHandler config) {
-		if (config.getConfig(Tags.MOD_ID+"require_goggles") && !EntityUtils.hasGoggles(accessor.getPlayer())) {
+		if (config.getConfig(Tags.MOD_ID+".require_goggles") && !EntityUtils.hasGoggles(accessor.getPlayer())) {
 			return tooltip;
 		}
 		Block block = accessor.getBlock();

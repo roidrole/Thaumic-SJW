@@ -23,7 +23,7 @@ public class ProviderGogglesDisplay implements IWailaDataProvider {
 		if (!(te instanceof IGogglesDisplayExtended)) {
 			return tooltip;
 		}
-		if (config.getConfig(Tags.MOD_ID+"require_goggles") && !EntityUtils.hasGoggles(accessor.getPlayer())) {
+		if (config.getConfig(Tags.MOD_ID+".require_goggles") && !EntityUtils.hasGoggles(accessor.getPlayer())) {
 			return tooltip;
 		}
 

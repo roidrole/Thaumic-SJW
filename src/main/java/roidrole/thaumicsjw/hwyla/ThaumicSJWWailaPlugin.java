@@ -21,8 +21,8 @@ public class ThaumicSJWWailaPlugin implements IWailaPlugin {
 
 		registrar.registerTooltipRenderer("thaumicwaila.aspect", new RendererAspect());
 
-		registrar.addConfig(Tags.MOD_NAME, Tags.MOD_ID+"aspects_as_text", "Show Aspects as Text", false);
-		registrar.addConfig(Tags.MOD_NAME, Tags.MOD_ID+"require_goggles", "Require Goggles of Revealing",  true);
+		registrar.addConfig(Tags.MOD_NAME, Tags.MOD_ID+".aspects_as_text", "Show Aspects as Text", false);
+		registrar.addConfig(Tags.MOD_NAME, Tags.MOD_ID+".require_goggles", "Require Goggles of Revealing",  true);
 	}
 
 }

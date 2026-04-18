@@ -30,7 +30,7 @@ public class ProviderEssentiaTransport implements IWailaDataProvider {
 		if (!(te instanceof IEssentiaTransport)) {
 			return tag;
 		}
-		if (ConfigHandler.instance().getConfig(Tags.MOD_ID+"require_goggles") && !EntityUtils.hasGoggles(player)) {
+		if (ConfigHandler.instance().getConfig(Tags.MOD_ID+".require_goggles") && !EntityUtils.hasGoggles(player)) {
 			return tag;
 		}
 
