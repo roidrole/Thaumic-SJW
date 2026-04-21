@@ -31,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class ArcaneWorkbenchCategory extends AbstractResearchCategory<ArcaneWorkbenchCategory.ArcaneWorkbenchWrapper> {
 
@@ -97,9 +98,7 @@ public class ArcaneWorkbenchCategory extends AbstractResearchCategory<ArcaneWork
 
     @Override
     public void populateRecipes() {
-        this.recipes = CraftingManager.REGISTRY.getKeys()
-            .stream()
-            .map(CraftingManager.REGISTRY::getObject)
+        this.recipes = StreamSupport.stream(CraftingManager.REGISTRY.spliterator(), false)
             .filter(iRecipe -> iRecipe instanceof IArcaneRecipe)
             .map(iRecipe -> new ArcaneWorkbenchCategory.ArcaneWorkbenchWrapper((IArcaneRecipe) iRecipe))
             .collect(Collectors.toList())
