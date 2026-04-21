@@ -2,7 +2,6 @@ package roidrole.thaumicsjw.jei.categories;
 
 import mezz.jei.api.recipe.IRecipeCategory;
 import roidrole.thaumicsjw.Tags;
-import roidrole.thaumicsjw.ThaumicSJWConfig;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,9 +15,7 @@ public abstract class AbstractResearchCategory<T extends IHasResearch> implement
 	public abstract void populateRecipes();
 
 	public AbstractResearchCategory() {
-		if(ThaumicSJWConfig.jeiConfig.hideRecipesIfMissingResearch){
-			categories.add(this);
-		}
+		categories.add(this);
 	}
 
 	@Override
