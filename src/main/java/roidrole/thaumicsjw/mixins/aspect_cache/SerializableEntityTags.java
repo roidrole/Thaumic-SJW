@@ -10,13 +10,13 @@ import java.io.Serializable;
 
 @Mixin(ThaumcraftApi.EntityTags.class)
 public abstract class SerializableEntityTags implements Serializable {
-	@Shadow
+	@Shadow(remap = false)
 	public String entityName;
 
-	@Shadow
+	@Shadow(remap = false)
 	public AspectList aspects;
 
-	@Shadow
+	@Shadow(remap = false)
 	public ThaumcraftApi.EntityTagsNBT[] nbts;
 
 	//Because there is no no-arg constructor
