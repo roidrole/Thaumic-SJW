@@ -14,6 +14,10 @@ public class SerializableEntityTags extends ThaumcraftApi.EntityTags implements 
 		super(null, null);
 	}
 
+	public SerializableEntityTags(String entityName, AspectList aspects, ThaumcraftApi.EntityTagsNBT[] nbts) {
+		super(entityName, aspects, nbts);
+	}
+
 	@Override
 	public void writeExternal(ObjectOutput out) throws IOException {
 		out.writeObject(this.entityName);

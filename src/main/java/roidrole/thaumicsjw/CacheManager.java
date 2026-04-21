@@ -135,6 +135,9 @@ public class CacheManager {
 	}
 
 	public static void parseJeiCache(IModRegistry registry){
+		if(!JEI_CACHE.isFile()){
+			return;
+		}
 		long time = System.currentTimeMillis();
 		List<AspectFromItemStackCategory.AspectFromItemStackWrapper> wrappers = new ArrayList<>();
 		Map<Aspect, List<ItemStack>> cache = new LinkedHashMap<>(Aspect.aspects.size());
