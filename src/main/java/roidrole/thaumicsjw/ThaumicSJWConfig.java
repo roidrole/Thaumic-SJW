@@ -63,7 +63,7 @@ public class ThaumicSJWConfig {
 			"minecraft:spawn_egg"
 		};
 
-		@Config.Comment("Should the crafting recipe for Salis Mundis and Triple Meat Treat appear in JEI?")
+		@Config.Comment("Should the crafting recipe for Salis Mundus and Triple Meat Treat appear in JEI?")
 		public boolean showSpecialRecipes = true;
 
 		@Config.Name("Category Toggles")

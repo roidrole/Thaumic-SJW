@@ -146,7 +146,7 @@ public class HEIPlugin implements IModPlugin {
 			}
 			registry.addRecipes(
 				Arrays.asList(
-					//Salis Mundis
+					//Salis Mundus
 					new DisplayOnlyRecipe(
 						new ItemStack(ItemsTC.salisMundus),
 						Arrays.asList(
