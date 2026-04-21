@@ -6,7 +6,6 @@ import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.ingredients.VanillaTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
@@ -17,7 +16,6 @@ import roidrole.thaumicsjw.jei.AspectListIngredient;
 import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.blocks.BlocksTC;
-import thaumcraft.api.capabilities.ThaumcraftCapabilities;
 import thaumcraft.api.crafting.CrucibleRecipe;
 import thaumcraft.api.crafting.IThaumcraftRecipe;
 
@@ -103,10 +101,13 @@ public class CrucibleCategory extends AbstractResearchCategory<CrucibleCategory.
         }
 
         @Override
-        public void drawInfo(Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
-            if (!ThaumcraftCapabilities.knowsResearch(Minecraft.getMinecraft().player, recipe.getResearch())) {
-                minecraft.getRenderItem().renderItemIntoGUI(new ItemStack(Blocks.BARRIER), 22, 14);
-            }
+        public int getBarrierX() {
+            return 22;
+        }
+
+        @Override
+        public int getBarrierY() {
+            return 14;
         }
 
         @Override

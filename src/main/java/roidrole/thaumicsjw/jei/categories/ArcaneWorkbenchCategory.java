@@ -6,7 +6,6 @@ import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.ingredients.VanillaTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
 import net.minecraft.item.crafting.Ingredient;
@@ -18,7 +17,6 @@ import roidrole.thaumicsjw.jei.AlphaDrawable;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.blocks.BlocksTC;
-import thaumcraft.api.capabilities.ThaumcraftCapabilities;
 import thaumcraft.api.crafting.IArcaneRecipe;
 import thaumcraft.api.crafting.ShapedArcaneRecipe;
 import thaumcraft.api.crafting.ShapelessArcaneRecipe;
@@ -147,9 +145,18 @@ public class ArcaneWorkbenchCategory extends AbstractResearchCategory<ArcaneWork
 
         @Override
         public void drawInfo(Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
+            IHasResearch.super.drawInfo(minecraft, recipeWidth, recipeHeight, mouseX, mouseY);
             minecraft.fontRenderer.drawString(TextFormatting.DARK_GRAY + String.valueOf(recipe.getVis()), 50 - minecraft.fontRenderer.getStringWidth(String.valueOf(recipe.getVis())) / 2, 12, 0);
-            if (!ThaumcraftCapabilities.knowsResearch(Minecraft.getMinecraft().player, recipe.getResearch()))
-                minecraft.getRenderItem().renderItemIntoGUI(new ItemStack(Blocks.BARRIER), 15, 8);
+        }
+
+        @Override
+        public int getBarrierX() {
+            return 15;
+        }
+
+        @Override
+        public int getBarrierY() {
+            return 8;
         }
 
         @Nullable

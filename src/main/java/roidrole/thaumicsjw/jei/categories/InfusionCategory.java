@@ -7,7 +7,6 @@ import mezz.jei.api.ingredients.VanillaTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTBase;
@@ -22,7 +21,6 @@ import roidrole.thaumicsjw.jei.AlphaDrawable;
 import roidrole.thaumicsjw.jei.AspectListIngredient;
 import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.aspects.AspectList;
-import thaumcraft.api.capabilities.ThaumcraftCapabilities;
 import thaumcraft.api.crafting.IThaumcraftRecipe;
 import thaumcraft.api.crafting.InfusionRecipe;
 
@@ -132,12 +130,20 @@ public class InfusionCategory extends AbstractResearchCategory<InfusionCategory.
 
         @Override
         public void drawInfo(Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
+            IHasResearch.super.drawInfo(minecraft, recipeWidth, recipeHeight, mouseX, mouseY);
             int instability = Math.min(5, recipe.instability / 2);
             String inst = TextFormatting.DARK_GRAY + new TextComponentTranslation("tc.inst").getFormattedText() + new TextComponentTranslation("tc.inst." + instability).getUnformattedText();
             minecraft.fontRenderer.drawString(inst, (recipeWidth / 2) - (minecraft.fontRenderer.getStringWidth(inst) / 2), 158, 0);
-            if (!ThaumcraftCapabilities.knowsResearch(Minecraft.getMinecraft().player, recipe.getResearch())) {
-                minecraft.getRenderItem().renderItemIntoGUI(new ItemStack(Blocks.BARRIER), 92, 9);
-            }
+        }
+
+        @Override
+        public int getBarrierX() {
+            return 92;
+        }
+
+        @Override
+        public int getBarrierY() {
+            return 9;
         }
 
         @Override
