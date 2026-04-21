@@ -4,7 +4,6 @@ import mezz.jei.api.gui.IDrawable;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.ingredients.VanillaTypes;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.init.Blocks;
@@ -17,6 +16,7 @@ import roidrole.thaumicsjw.jei.AlphaDrawable;
 import roidrole.thaumicsjw.jei.AspectListIngredient;
 import thaumcraft.api.ThaumcraftApi;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.blocks.BlocksTC;
 import thaumcraft.api.capabilities.ThaumcraftCapabilities;
 import thaumcraft.api.crafting.CrucibleRecipe;
 import thaumcraft.api.crafting.IThaumcraftRecipe;
@@ -41,7 +41,7 @@ public class CrucibleCategory extends AbstractResearchCategory<CrucibleCategory.
 
     @Override
     public String getTitle() {
-        return new ItemStack(Block.getBlockFromName("thaumcraft:crucible")).getDisplayName();
+        return new ItemStack(BlocksTC.crucible).getDisplayName();
     }
 
     @Override

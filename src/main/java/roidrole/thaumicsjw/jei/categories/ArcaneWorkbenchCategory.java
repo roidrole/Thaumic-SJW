@@ -4,7 +4,6 @@ import mezz.jei.api.gui.IDrawable;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.ingredients.VanillaTypes;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.init.Blocks;
@@ -18,6 +17,7 @@ import roidrole.thaumicsjw.Tags;
 import roidrole.thaumicsjw.jei.AlphaDrawable;
 import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.blocks.BlocksTC;
 import thaumcraft.api.capabilities.ThaumcraftCapabilities;
 import thaumcraft.api.crafting.IArcaneRecipe;
 import thaumcraft.api.crafting.ShapedArcaneRecipe;
@@ -44,7 +44,7 @@ public class ArcaneWorkbenchCategory extends AbstractResearchCategory<ArcaneWork
 
     @Override
     public String getTitle() {
-        return new ItemStack(Block.getBlockFromName("thaumcraft:arcane_workbench")).getDisplayName();
+        return new ItemStack(BlocksTC.arcaneWorkbench).getDisplayName();
     }
 
     @Override
