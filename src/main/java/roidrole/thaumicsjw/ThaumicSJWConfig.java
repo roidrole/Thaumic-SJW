@@ -85,6 +85,9 @@ public class ThaumicSJWConfig {
 
 			@Config.Name("Infusion Crafting")
 			public boolean infusion = true;
+
+			@Config.Name("Infernal Furnace")
+			public boolean infernalFurnace = true;
 		}
 	}
 }

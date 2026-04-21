@@ -5,13 +5,13 @@ import mezz.jei.api.ingredients.IModIngredientRegistration;
 import mezz.jei.api.recipe.IIngredientType;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
 import mezz.jei.api.recipe.VanillaRecipeCategoryUid;
-import mezz.jei.plugins.vanilla.crafting.ShapelessRecipeWrapper;
-import net.minecraft.item.Item;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.CraftingManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.oredict.ShapelessOreRecipe;
+import net.minecraft.util.NonNullList;
+import net.minecraftforge.oredict.OreDictionary;
 import roidrole.thaumicsjw.jei.AspectListIngredient;
+import roidrole.thaumicsjw.jei.DisplayOnlyRecipe;
 import roidrole.thaumicsjw.jei.ResearchManager;
 import roidrole.thaumicsjw.jei.categories.*;
 import roidrole.thaumicsjw.jei.gui.FocalManipulatorAdvancedGuiHandler;
@@ -21,14 +21,13 @@ import thaumcraft.api.aspects.Aspect;
 import thaumcraft.api.aspects.AspectList;
 import thaumcraft.api.blocks.BlocksTC;
 import thaumcraft.api.crafting.IArcaneRecipe;
+import thaumcraft.api.internal.CommonInternals;
+import thaumcraft.api.items.ItemsTC;
 import thaumcraft.client.gui.GuiArcaneWorkbench;
 import thaumcraft.common.container.ContainerArcaneWorkbench;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -39,8 +38,8 @@ public class HEIPlugin implements IModPlugin {
 
 	@Override
 	public void registerSubtypes(ISubtypeRegistry subtypeRegistry) {
-		subtypeRegistry.useNbtForSubtypes(Item.getByNameOrId("thaumcraft:crystal_essence"));
-		subtypeRegistry.useNbtForSubtypes(Item.getByNameOrId("thaumcraft:phial"));
+		subtypeRegistry.useNbtForSubtypes(ItemsTC.crystalEssence);
+		subtypeRegistry.useNbtForSubtypes(ItemsTC.phial);
 	}
 
 	@Override
@@ -60,7 +59,7 @@ public class HEIPlugin implements IModPlugin {
 
 	@Override
 	public void registerCategories(IRecipeCategoryRegistration registry) {
-		AbstractResearchCategory.categories = new ArrayList<>(4);
+		AbstractResearchCategory.categories = new ArrayList<>(8);
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.arcaneWorkbench){
 			registry.addRecipeCategories(new ArcaneWorkbenchCategory());
 		}
@@ -75,6 +74,9 @@ public class HEIPlugin implements IModPlugin {
 		}
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.aspectCompound){
 			registry.addRecipeCategories(new AspectCompoundCategory(registry.getJeiHelpers().getGuiHelper()));
+		}
+		if(ThaumicSJWConfig.jeiConfig.categoryToggle.infernalFurnace){
+			registry.addRecipeCategories(new InfernalFurnaceCategory(registry.getJeiHelpers().getGuiHelper()));
 		}
 		AbstractResearchCategory.categories.trimToSize();
 	}
@@ -118,15 +120,60 @@ public class HEIPlugin implements IModPlugin {
 			registry.addRecipes(compoundWrappers, AspectCompoundCategory.UUID);
 		}
 
+		if(ThaumicSJWConfig.jeiConfig.categoryToggle.infernalFurnace){
+			registry.addRecipeCatalyst(new ItemStack(BlocksTC.infernalFurnace), InfernalFurnaceCategory.UUID);
+			registry.addRecipeCatalyst(new ItemStack(BlocksTC.bellows), InfernalFurnaceCategory.UUID);
+
+			List<InfernalFurnaceCategory.InfernalFurnaceWrapper> compoundWrappers = new ArrayList<>();
+			for (ThaumcraftApi.SmeltBonus bonus : CommonInternals.smeltingBonus) {
+				InfernalFurnaceCategory.InfernalFurnaceWrapper wrapper = new InfernalFurnaceCategory.InfernalFurnaceWrapper(bonus);
+				if(wrapper.isValid()){
+					compoundWrappers.add(wrapper);
+				}
+			}
+			registry.addRecipes(compoundWrappers, InfernalFurnaceCategory.UUID);
+		}
+
 		if(ThaumicSJWConfig.jeiConfig.showSpecialRecipes){
+			NonNullList<ItemStack> crystal = NonNullList.create();
+			ItemsTC.crystalEssence.getSubItems(ItemsTC.crystalEssence.getCreativeTab(), crystal);
+			NonNullList<ItemStack> nuggetMeat = OreDictionary.getOres("nuggetMeat");
+			for (ItemStack stack : nuggetMeat) {
+				stack.setStackDisplayName("3 Different Meat Nuggets");
+			}
+			for (ItemStack stack : crystal) {
+				stack.setStackDisplayName("3 Different Crystals");
+			}
 			registry.addRecipes(
 				Arrays.asList(
-					new ShapelessRecipeWrapper<>(registry.getJeiHelpers(), (ShapelessOreRecipe) ThaumcraftApi.getCraftingRecipesFake().get(new ResourceLocation("thaumcraft:triplemeattreatfake"))),
-					new ShapelessRecipeWrapper<>(registry.getJeiHelpers(), (ShapelessOreRecipe) ThaumcraftApi.getCraftingRecipesFake().get(new ResourceLocation("thaumcraft:salismundusfake")))
+					//Salis Mundis
+					new DisplayOnlyRecipe(
+						new ItemStack(ItemsTC.salisMundus),
+						Arrays.asList(
+							Collections.singletonList(new ItemStack(Items.FLINT)),
+							Collections.singletonList(new ItemStack(Items.BOWL)),
+							Collections.singletonList(new ItemStack(Items.REDSTONE)),
+							crystal,
+							crystal,
+							crystal
+						)
+					),
+					//Triple meat treat
+					new DisplayOnlyRecipe(
+						new ItemStack(ItemsTC.tripleMeatTreat),
+						Arrays.asList(
+							nuggetMeat,
+							nuggetMeat,
+							nuggetMeat,
+							Collections.singletonList(new ItemStack(Items.SUGAR))
+						)
+					)
 				),
 				VanillaRecipeCategoryUid.CRAFTING
 			);
 		}
+
+		registry.addRecipeCatalyst(new ItemStack(BlocksTC.infernalFurnace), VanillaRecipeCategoryUid.SMELTING);
 
 
 		registry.addAdvancedGuiHandlers(new ResearchTableAdvancedGuiHandler());
@@ -135,10 +182,17 @@ public class HEIPlugin implements IModPlugin {
 
 	@Override
 	public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
+		IRecipeRegistry registry = jeiRuntime.getRecipeRegistry();
+		StreamSupport.stream(CraftingManager.REGISTRY.spliterator(), false)
+			.filter(recipe -> recipe instanceof IArcaneRecipe)
+			.map(recipe -> registry.getRecipeWrapper(recipe, VanillaRecipeCategoryUid.CRAFTING))
+			.filter(Objects::nonNull)
+			.forEach(recipe -> registry.hideRecipe(recipe, VanillaRecipeCategoryUid.CRAFTING));
+
+
 		if(!ThaumicSJWConfig.jeiConfig.hideRecipesIfMissingResearch){
 			return;
 		}
-
 		ResearchManager.runtime = jeiRuntime;
 	}
 

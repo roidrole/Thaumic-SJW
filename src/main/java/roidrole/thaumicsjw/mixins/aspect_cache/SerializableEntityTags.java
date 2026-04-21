@@ -3,7 +3,8 @@ package roidrole.thaumicsjw.mixins.aspect_cache;
 import org.spongepowered.asm.mixin.Mixin;
 import thaumcraft.api.ThaumcraftApi;
 
-import java.io.*;
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 
 @Mixin(ThaumcraftApi.EntityTags.class)
 public abstract class SerializableEntityTags implements Serializable {
