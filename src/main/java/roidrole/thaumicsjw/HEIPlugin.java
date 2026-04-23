@@ -46,7 +46,7 @@ public class HEIPlugin implements IModPlugin {
 	public void registerIngredients(IModIngredientRegistration registry) {
 		List<AspectList> aspects = Aspect.aspects.values()
 			.stream()
-			.map(aspect -> new AspectList().add(aspect, 1))
+			.map(aspect -> new AspectList().add(aspect, 0))
 			.collect(Collectors.toList());
 
 		registry.register(
@@ -196,4 +196,8 @@ public class HEIPlugin implements IModPlugin {
 		ResearchManager.runtime = jeiRuntime;
 	}
 
+	//Helper method to work with JEI
+	public static <T> List<List<T>> nestedSingletonList(T element){
+		return Collections.singletonList(Collections.singletonList(element));
+	}
 }
