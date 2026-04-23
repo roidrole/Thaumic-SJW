@@ -6,9 +6,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 import thaumcraft.api.aspects.AspectList;
+import thaumcraft.api.blocks.BlocksTC;
+import thaumcraft.common.tiles.essentia.TileJarFillable;
 
 import javax.annotation.Nullable;
 import java.awt.*;
@@ -108,6 +113,22 @@ public class AspectListIngredient {
 		@Override
 		public String getErrorInfo(AspectList ingredient) {
 			return "";
+		}
+
+		@Override
+		public ItemStack getCheatItemStack(AspectList ingredient) {
+			ItemStack jar = new ItemStack(BlocksTC.jarNormal);
+			NBTTagCompound tag = new NBTTagCompound();
+			jar.setTagCompound(tag);
+			NBTTagList list = new NBTTagList();
+			tag.setTag("Aspects", list);
+
+			NBTTagCompound aspectNBT = new NBTTagCompound();
+			aspectNBT.setString("key", ingredient.aspects.keySet().iterator().next().getTag());
+			aspectNBT.setInteger("amount", TileJarFillable.CAPACITY);
+			list.appendTag(aspectNBT);
+
+			return jar;
 		}
 	}
 

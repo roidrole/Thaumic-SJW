@@ -83,6 +83,9 @@ public class ThaumicSJWConfig {
 			@Config.Name("Crucible")
 			public boolean crucible = true;
 
+			@Config.Name("Salis Mundus")
+			public boolean salisMundus = true;
+
 			@Config.Name("Infusion Crafting")
 			public boolean infusion = true;
 

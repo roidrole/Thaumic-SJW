@@ -28,6 +28,7 @@ public class LateMixinLoader implements ILateMixinLoader {
 				mixinConfigs.add("mixins.thaumicsjw.aspect_cache.betterwithmods.json");
 			}
 		}
+		mixinConfigs.add("mixins.thaumicsjw.accessors.json");
 		return mixinConfigs;
 	}
 }

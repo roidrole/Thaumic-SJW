@@ -46,7 +46,7 @@ public class HEIPlugin implements IModPlugin {
 	public void registerIngredients(IModIngredientRegistration registry) {
 		List<AspectList> aspects = Aspect.aspects.values()
 			.stream()
-			.map(aspect -> new AspectList().add(aspect, 1))
+			.map(aspect -> new AspectList().add(aspect, 0))
 			.collect(Collectors.toList());
 
 		registry.register(
@@ -59,6 +59,7 @@ public class HEIPlugin implements IModPlugin {
 
 	@Override
 	public void registerCategories(IRecipeCategoryRegistration registry) {
+		IGuiHelper helper = registry.getJeiHelpers().getGuiHelper();
 		AbstractResearchCategory.categories = new ArrayList<>(8);
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.arcaneWorkbench){
 			registry.addRecipeCategories(new ArcaneWorkbenchCategory());
@@ -69,14 +70,17 @@ public class HEIPlugin implements IModPlugin {
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.infusion){
 			registry.addRecipeCategories(new InfusionCategory());
 		}
+		if(ThaumicSJWConfig.jeiConfig.categoryToggle.salisMundus){
+			registry.addRecipeCategories(new SalisMundusCategory(helper));
+		}
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.aspectFromItemStack){
 			registry.addRecipeCategories(new AspectFromItemStackCategory());
 		}
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.aspectCompound){
-			registry.addRecipeCategories(new AspectCompoundCategory(registry.getJeiHelpers().getGuiHelper()));
+			registry.addRecipeCategories(new AspectCompoundCategory(helper));
 		}
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.infernalFurnace){
-			registry.addRecipeCategories(new InfernalFurnaceCategory(registry.getJeiHelpers().getGuiHelper()));
+			registry.addRecipeCategories(new InfernalFurnaceCategory(helper));
 		}
 		AbstractResearchCategory.categories.trimToSize();
 	}
@@ -100,6 +104,9 @@ public class HEIPlugin implements IModPlugin {
 		}
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.infusion){
 			registry.addRecipeCatalyst(new ItemStack(BlocksTC.infusionMatrix), InfusionCategory.UUID);
+		}
+		if(ThaumicSJWConfig.jeiConfig.categoryToggle.salisMundus){
+			registry.addRecipeCatalyst(SalisMundusCategory.salisMundus.get(0), SalisMundusCategory.UUID);
 		}
 
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.aspectFromItemStack){
@@ -196,4 +203,8 @@ public class HEIPlugin implements IModPlugin {
 		ResearchManager.runtime = jeiRuntime;
 	}
 
+	//Helper method to work with JEI
+	public static <T> List<List<T>> nestedSingletonList(T element){
+		return Collections.singletonList(Collections.singletonList(element));
+	}
 }
