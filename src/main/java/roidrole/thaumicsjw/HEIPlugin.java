@@ -71,7 +71,7 @@ public class HEIPlugin implements IModPlugin {
 			registry.addRecipeCategories(new InfusionCategory());
 		}
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.salisMundus){
-			registry.addRecipeCategories(new SalisMundusCategory(helper));
+			registry.addRecipeCategories(new SalisMundusCategory(registry.getJeiHelpers()));
 		}
 		if(ThaumicSJWConfig.jeiConfig.categoryToggle.aspectFromItemStack){
 			registry.addRecipeCategories(new AspectFromItemStackCategory());

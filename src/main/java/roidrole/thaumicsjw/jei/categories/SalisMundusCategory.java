@@ -1,6 +1,6 @@
 package roidrole.thaumicsjw.jei.categories;
 
-import mezz.jei.api.IGuiHelper;
+import mezz.jei.api.IJeiHelpers;
 import mezz.jei.api.gui.IDrawable;
 import mezz.jei.api.gui.IGuiIngredientGroup;
 import mezz.jei.api.gui.IRecipeLayout;
@@ -9,6 +9,8 @@ import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.gui.elements.DrawableBlank;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.oredict.OreDictionary;
@@ -33,13 +35,15 @@ public class SalisMundusCategory extends AbstractResearchCategory<SalisMundusCat
 	public static final String UUID = Tags.MOD_ID + ".salis_mundus";
 	public static final String title = new ItemStack(ItemsTC.salisMundus).getDisplayName();
 	public final IDrawable slot;
+	public final IJeiHelpers helpers;
 
 	//Shared ItemStack for all wrappers
 	public static final List<ItemStack> salisMundus = Collections.singletonList(new ItemStack(ItemsTC.salisMundus));
 
-	public SalisMundusCategory(IGuiHelper helper){
+	public SalisMundusCategory(IJeiHelpers helper){
 		super();
-		this.slot = helper.getSlotDrawable();
+		this.slot = helper.getGuiHelper().getSlotDrawable();
+		this.helpers = helper;
 	}
 
 	@Override
@@ -109,9 +113,14 @@ public class SalisMundusCategory extends AbstractResearchCategory<SalisMundusCat
 				this.research = oreTrigger.getResearch();
 			} else if(trigger instanceof DustTriggerSimple){
 				AccessorDustTriggerSimple simpleTrigger = (AccessorDustTriggerSimple) trigger;
-				NonNullList<ItemStack> inputs = NonNullList.create();
 				Block target = simpleTrigger.getTarget();
-				target.getSubBlocks(target.getCreativeTab(), inputs);
+				List<ItemStack> inputs;
+				if(target == Blocks.CAULDRON){
+					inputs = Collections.singletonList(new ItemStack(Items.CAULDRON));
+				} else {
+					inputs = NonNullList.create();
+					target.getSubBlocks(target.getCreativeTab(), (NonNullList<ItemStack>) inputs);
+				}
 				this.input = Arrays.asList(salisMundus, inputs);
 				this.output = HEIPlugin.nestedSingletonList(simpleTrigger.getResult());
 				this.research = simpleTrigger.getResearch();
