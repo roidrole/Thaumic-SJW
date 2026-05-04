@@ -15,7 +15,7 @@ import thaumcraft.api.internal.CommonInternals;
 public abstract class ThaumcraftApiMixin {
 	/**
 	 * @author roidrole
-	 * @reason Eliminate some copying, use better hash method, cleanup deobf code
+	 * @reason Eliminate copying, use better hash method, cleanup deobf code
 	 */
 	@Overwrite(remap = false)
 	public static boolean exists(ItemStack item) {

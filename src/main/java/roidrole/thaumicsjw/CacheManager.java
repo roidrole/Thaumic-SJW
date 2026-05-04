@@ -23,6 +23,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class CacheManager {
 	private static final File JEI_CACHE = new File(ThaumicSJWConfig.general.cachePath, "jei-cache.json");
@@ -67,40 +69,56 @@ public class CacheManager {
 		blacklist.add(null);
 		blacklist.add(Items.AIR.getRegistryName());
 
-		Map<Aspect, ArrayMap<List<String>>> cache = new ConcurrentHashMap<>();
-		for(Aspect aspect : Aspect.aspects.values()){
-			cache.put(aspect, new ArrayMap<>());
-		}
 
 		//Because concurrency
-		final int[] cachedAmount = {0};
-		final long[] lastTimeChecked = {System.currentTimeMillis()};
+		final AtomicInteger cachedAmount = new AtomicInteger(0);
+		final AtomicLong lastTimeChecked = new AtomicLong(System.currentTimeMillis());
 
-		items
+		Map<Aspect, ArrayMap<List<String>>> cache = items
 			.parallelStream()
-			.filter(stack -> !blacklist.contains(Item.REGISTRY.getNameForObject(stack.getItem())))
+			.filter(stack -> !blacklist.contains(stack.getItem().delegate.name()))
 			//Since Thaumcraft caches ItemStack aspects itself, filtering for empty AspectList is fine
 			.filter(stack -> {
 				AspectList list = AspectHelper.getObjectAspects(stack);
 				if (list == null || list.size() == 0){
-					cachedAmount[0]++;
+					cachedAmount.getAndIncrement();
 					return false;
 				}
 				return true;
 			})
-			.forEach(stack -> {
-				AspectList list = AspectHelper.getObjectAspects(stack);
-				list.aspects.forEach((aspect, count) -> cache
-					.get(aspect)
-					.computeIfAbsent(count, ArrayList::new)
-					.add(writeItemStack(stack, count)));
+			.collect(
+				//So I don't have to computeIfAbsent
+				() -> {
+					Map<Aspect, ArrayMap<List<String>>> map = new HashMap<>();
+					for(Aspect aspect : Aspect.aspects.values()){
+						map.put(aspect, new ArrayMap<>());
+					}
+					return map;
+				},
+				(map, stack) -> {
+					AspectList list = AspectHelper.getObjectAspects(stack);
+					list.aspects.forEach((aspect, count) -> map
+						.get(aspect)
+						.computeIfAbsent(count, ArrayList::new)
+						.add(writeItemStack(stack, count))
+					);
 
-				cachedAmount[0]++;
-				if (lastTimeChecked[0] + 5000 < System.currentTimeMillis()) {
-					lastTimeChecked[0] = System.currentTimeMillis();
-					ThaumicSJW.LOGGER.info("ItemStack Aspect checking at {}%", 100 * cachedAmount[0] / items.size());
+					cachedAmount.getAndIncrement();
+					if (lastTimeChecked.get() + 5000 < System.currentTimeMillis()) {
+						lastTimeChecked.set(System.currentTimeMillis());
+						ThaumicSJW.LOGGER.info("ItemStack Aspect checking at {}%", 100 * cachedAmount.get() / items.size());
+					}
+				},
+				(map1, map2) -> {
+					//Merge 2 in 1
+					map2.forEach((key2, value2) -> {
+						ArrayMap<List<String>> value1 = map1.get(key2);
+						value2.forEach((count2, strings2) -> {
+							value1.computeIfAbsent(count2, ArrayList::new).addAll(strings2);
+						});
+					});
 				}
-			})
+			)
 		;
 
 		ThaumicSJW.LOGGER.info("ItemStack Aspect checking at 100%");
@@ -144,6 +162,7 @@ public class CacheManager {
 
 		try (JsonReader reader = new JsonReader(new FileReader(JEI_CACHE))){
 			reader.beginObject();
+			reader.setLenient(true);
 
 			do {
 				Aspect aspect = Aspect.getAspect(reader.nextName());
@@ -188,7 +207,7 @@ public class CacheManager {
 	public static String writeItemStack(ItemStack stack, int count){
 		StringBuilder itemNbt = new StringBuilder(64);
 		itemNbt.append("[\"");
-		itemNbt.append(Item.REGISTRY.getNameForObject(stack.getItem()));
+		itemNbt.append(stack.getItem().delegate.name());
 		itemNbt.append("\",");
 		itemNbt.append(count);
 		if(stack.getItemDamage() != 0){
@@ -205,7 +224,6 @@ public class CacheManager {
 
 	//Reads ItemStack from format: [resourceLocation, count, damage, tag]
 	public static ItemStack readItemStack(JsonReader reader) throws IOException, NBTException {
-		reader.setLenient(true);
 		reader.beginArray();
 		ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(reader.nextString())), reader.nextInt());
 		if(reader.peek() == JsonToken.NUMBER){
