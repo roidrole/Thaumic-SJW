@@ -22,6 +22,8 @@
 **Removed**: 
 - Brain in a jar fluid handling (included in ThaumicTweaker)
 
+**Fixed**: OreDict recipes for the infernal furnace category not working
+
 ## 1.1.3
 **Fixed** #4 — crash related to JER integration
 
