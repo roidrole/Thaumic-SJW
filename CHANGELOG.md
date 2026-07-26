@@ -1,5 +1,7 @@
-## Unreleased
+## 1.2.1
 **Changed**: Better defaults in jei aspect blacklist
+
+**Fixed**: Compatibility with Thaumic Energistics integration for Thaumic JEI
 
 ## 1.2.0
 **Added**:

@@ -12,7 +12,6 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
-import roidrole.thaumicinfo.Tags;
 import roidrole.thaumicinfo.jei.AlphaDrawable;
 import thaumcraft.Thaumcraft;
 import thaumcraft.api.aspects.Aspect;
@@ -33,7 +32,8 @@ import java.util.stream.StreamSupport;
 
 public class ArcaneWorkbenchCategory extends AbstractResearchCategory<ArcaneWorkbenchCategory.ArcaneWorkbenchWrapper> {
 
-    public static final String UUID = Tags.MOD_ID + ".arcane_workbench";
+    //Thaumic Energistics takes this category by UUID. Though it pains me, this is what we must
+    public static final String UUID = "THAUMCRAFT_ARCANE_WORKBENCH";
 
     @Override
     public String getUid() {
